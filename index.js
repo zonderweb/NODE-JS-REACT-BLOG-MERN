@@ -31,3 +31,5 @@ app.listen(4444, (err) => {
   }
   return console.log('SERVER WORK');
 });
+
+// https://youtu.be/GQ_pTmcXNrQ?si=xJCkFmLh60yAVgQv&t=4801
