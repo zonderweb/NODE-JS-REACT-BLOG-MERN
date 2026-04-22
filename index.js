@@ -17,6 +17,49 @@ const app = express();
 
 app.use(express.json());
 
+// LOGIN
+app.post('/auth/login/', async (req, res) => {
+  try {
+    const user = await userModel.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(404).json({
+        message: 'Користувача не знайдено', // Не вірний логін або пароль
+      });
+    }
+
+    const isValidPass = await bcrypt.compare(req.body.password, user._doc.passwordHash);
+    if (!isValidPass) {
+      return res.status(400).json({
+        message: 'Не вірний пароль', // Не вірний логін або пароль
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        _id: user._id,
+      },
+      env.secret,
+      {
+        expiresIn: '30d',
+      },
+    );
+    // eslint-disable-next-line
+    const { passwordHash, ...userData } = user._doc;
+
+    return res.json({
+      ...userData,
+      token,
+    });
+
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: 'Не вдалось авторизуватись',
+    });
+  }
+});
+
+// REGISTER
 app.post('/auth/register', registerValidation, async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -62,9 +105,13 @@ app.post('/auth/register', registerValidation, async (req, res) => {
 });
 
 
+
+
 app.listen(4444, (err) => {
   if (err) {
     return console.log(err);
   }
   return console.log('SERVER WORK');
 });
+
+// https://youtu.be/GQ_pTmcXNrQ?si=qCsdVL7bddyVYOdY&t=3891
