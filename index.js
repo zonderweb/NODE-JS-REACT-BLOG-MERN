@@ -41,7 +41,7 @@ app.post('/auth/register', registerValidation, async (req, res) => {
       {
         _id: user._id,
       },
-      'Secret1981',
+      env.secret,
       {
         expiresIn: '30d',
       },
