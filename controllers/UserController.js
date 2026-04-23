@@ -4,6 +4,7 @@ import { validationResult } from 'express-validator';
 import userModel from '../models/User.js';
 import env from '../env.json' with {type: 'json'};
 
+// REGISTER
 export const register = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -48,6 +49,7 @@ export const register = async (req, res) => {
   }
 };
 
+// LOGIN
 export const login = async (req, res) => {
   try {
     const user = await userModel.findOne({ email: req.body.email });
@@ -89,6 +91,7 @@ export const login = async (req, res) => {
   }
 };
 
+// INFO USER
 export const getMe = async (req, res) => {
   try {
     const user = await userModel.findById(req.userId);
