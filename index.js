@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import env from './env.json' with {type: 'json'};
-import { registerValidation, loginValidation } from './validations/validations.js';
+import { registerValidation, loginValidation, postCreateValidation } from './validations/validations.js';
 import checkAuth from './utils/checkAuth.js';
 import * as UserController from './controllers/UserController.js';
 import * as PostController from './controllers/PostControllers.js';
@@ -25,8 +25,12 @@ app.post('/auth/register', registerValidation, UserController.register);
 // USER
 app.get('/auth/me', checkAuth, UserController.getMe);
 
-// CREATE POST
-// app.get('/posts');
+// POSTS
+app.get('/posts', PostController.getAll);
+app.get('/posts/:id', PostController.getOne);
+app.post('/posts', checkAuth, postCreateValidation, PostController.create);
+app.delete('/posts/:id', checkAuth, PostController.remove);
+// app.patch('/posts', PostController.update);
 
 // LISTEN
 app.listen(4444, (err) => {
@@ -36,5 +40,4 @@ app.listen(4444, (err) => {
   return console.log('SERVER WORK');
 });
 
-
-// https://youtu.be/GQ_pTmcXNrQ?si=6USOlI4USyPzhHxx&t=5381
+// https://youtu.be/GQ_pTmcXNrQ?si=vqdTQg_irj_yE9AE&t=6383
