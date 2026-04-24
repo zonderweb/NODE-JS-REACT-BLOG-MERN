@@ -1,10 +1,10 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import multer from 'multer';
 import env from './env.json' with {type: 'json'};
 import { registerValidation, loginValidation, postCreateValidation } from './validations/validations.js';
-import checkAuth from './utils/checkAuth.js';
-import * as UserController from './controllers/UserController.js';
-import * as PostController from './controllers/PostControllers.js';
+import { UserController, PostController } from './controllers/index.js';
+import { handleValidationsErrors, checkAuth } from './utils/index.js';
 
 
 mongoose
@@ -14,23 +14,41 @@ mongoose
 
 const app = express();
 
+const storage = multer.diskStorage({
+  destination: (_, __, cb) => {
+    cb(null, 'uploads');
+  },
+  filename: (_, file, cb) => {
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 // LOGIN
-app.post('/auth/login/', loginValidation, UserController.login);
+app.post('/auth/login/', loginValidation, handleValidationsErrors, UserController.login);
 
 // REGISTER
-app.post('/auth/register', registerValidation, UserController.register);
+app.post('/auth/register', registerValidation, handleValidationsErrors, UserController.register);
 
 // USER
 app.get('/auth/me', checkAuth, UserController.getMe);
 
+app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
+  res.json({
+    url: `/uploads/${req.file.originalname}`,
+  });
+});
+
 // POSTS
 app.get('/posts', PostController.getAll);
+app.post('/posts', checkAuth, postCreateValidation, handleValidationsErrors, PostController.create);
 app.get('/posts/:id', PostController.getOne);
-app.post('/posts', checkAuth, postCreateValidation, PostController.create);
 app.delete('/posts/:id', checkAuth, PostController.remove);
-// app.patch('/posts', PostController.update);
+app.patch('/posts/:id', checkAuth, postCreateValidation, handleValidationsErrors, PostController.update);
 
 // LISTEN
 app.listen(4444, (err) => {
@@ -40,4 +58,4 @@ app.listen(4444, (err) => {
   return console.log('SERVER WORK');
 });
 
-// https://youtu.be/GQ_pTmcXNrQ?si=vqdTQg_irj_yE9AE&t=6383
+// https://youtu.be/GQ_pTmcXNrQ?si=94Yo3igzth9YvEnX&t=7505

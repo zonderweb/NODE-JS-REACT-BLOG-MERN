@@ -91,3 +91,32 @@ export const remove = async (req, res) => {
     });
   }
 };
+
+// UPDATE ARTICLE
+export const update = async (req, res) => {
+  try {
+    const postId = req.params.id;
+
+    await PostModel.updateOne(
+      {
+        _id: postId,
+      },
+      {
+        title: req.body.title,
+        text: req.body.text,
+        imageUrl: req.body.imageUrl,
+        user: req.userId,
+        tags: req.body.tags,
+      },
+    );
+
+    return res.json({
+      success: true
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      message: 'Не вдалось відредагувати статтью'
+    });
+  }
+};
